@@ -6,8 +6,8 @@ After=multi-user.target
 [Service]
 Type=simple
 Restart=always
-User=peabody
-ExecStart=python3 /home/peabody/statusDisp.py
+WorkingDirectory=/opt/amya-status-display
+ExecStart=python3 /opt/amya-status-display/statusDisp.py
 
 [Install]
 WantedBy=multi-user.target

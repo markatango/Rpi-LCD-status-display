@@ -1,0 +1,4 @@
+*.pyc
+showip/__pycache__/
+pil_text.png
+
