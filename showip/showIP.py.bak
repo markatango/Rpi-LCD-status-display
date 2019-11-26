@@ -1,0 +1,79 @@
+from PIL import Image, ImageFont, ImageDraw
+import subprocess as sp
+from subprocess import Popen, PIPE
+import shlex
+import re
+class ShowIP:
+   def __init__(self):
+     self.cmds = []
+     self.cmds.append('ip -f inet -h addr ')
+     self.cmds.append('grep eth0$')
+     self.cmds.append('grep -Eo "([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3}/[[:digit:]]{1,2}"')
+#ip route response:
+#default via 192.168.4.1 dev eth0 proto dhcp src 192.168.4.115 metric 203
+#192.168.4.0/24 dev eth0 proto dhcp scope link src 192.168.4.115 metric 203
+ 
+     self.cmds_2 = []
+     self.cmds_2.append("ip route")
+     self.cmds_2.append("grep ^default")
+     self.cmds_2.append("grep -Eo 'default via ([[:digit:]]{1,3}\.){3}[[:digit:]]{1,3}'")
+
+   def _getPipedResp_1(self, cmds):
+     p = [0 for c in cmds]
+     for i,c in enumerate(cmds):
+         args = shlex.split(c)
+         if i == 0: # first time
+   	      p[i] = Popen(args, stdout=PIPE)
+         else:
+              p[i] = Popen(args, stdin=p[i-1].stdout, stdout=PIPE)
+     p[0].stdout.close()
+     resp = str(p[len(p)-1].communicate()[0], 'utf-8')
+     return resp
+
+   def getIPText_1(self):
+     resp = self._getPipedResp_1(self.cmds)
+     pat = r"^([0-9]{1,3})\."
+     m = re.match(pat, resp)
+     if not m or not m.group(0) or m.group(0) == '169':
+        self.text = "No network connection"
+        self.connected = False
+     else:
+        self.text = "IP: {}".format(resp)
+        self.connected = True
+     return self.connected, self.text
+
+   def _getPipedResp_2(self, cmds):
+     p = [0 for c in cmds]
+     for i,c in enumerate(cmds):
+         args = shlex.split(c)
+         if i == 0: # first time
+              p[i] = Popen(args, stdout=PIPE)
+         else:
+              p[i] = Popen(args, stdin=p[i-1].stdout, stdout=PIPE)
+     p[0].stdout.close()
+     resp = str(p[len(p)-1].communicate()[0], 'utf-8')
+     return resp
+
+   def getIPText_2(self):
+     resp = self._getPipedResp_1(self.cmds_2)
+     pat = r"^([0-9]{1,3})\."
+     m = re.match(pat, resp)
+     if not m or not m.group(0) or m.group(0) == '169':
+        self.text = "No network connection"
+        self.connected = False
+     else:
+        self.text = "IP: {}".format(resp)
+        self.connected = True
+     return self.connected, self.text
+
+   def getHostname(self):
+     p =  sp.run("hostname", capture_output=True)
+     pstr = str(p.stdout, 'utf-8')
+     hnText = "Hostname: {}".format(pstr)
+     return hnText
+
+
+if __name__ == "__main__":
+   sip = ShowIP()
+   res = sip.getIPText_2()
+   print("IP: {}".format(res)) 

@@ -1,0 +1,13 @@
+[Unit]
+Description=Amada green field
+DefaultDependencies=no
+After=multi-user.target
+
+[Service]
+Type=simple
+Restart=always
+User=peabody
+ExecStart=python3 /home/peabody/statusDisp.py
+
+[Install]
+WantedBy=multi-user.target
