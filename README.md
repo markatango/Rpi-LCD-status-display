@@ -5,8 +5,8 @@ Displays network and hostname information on adapitft LCD display.
 ## Behavior
 If the IoT node acquires an IP address, then the LCD background color is GREEN and displays the IPv4 network address (CIDR), IPv4 host address, and hostname.  If the IoT node fails to acquire an IP address, then the LCD background color is RED.
 
-![No connection](https://github.com/miyachiamericaeurope/amya-status-display/blob/media/NoConnection.jpg)
-![OK connection](https://github.com/miyachiamericaeurope/amya-status-display/blob/media/Connection.jpg)
+<img src="https://github.com/miyachiamericaeurope/amya-status-display/blob/media/NoConnection.jpg" alt="No connection" width="320p" height="240"> <img src="https://github.com/miyachiamericaeurope/amya-status-display/blob/media/Connection.jpg" alt="OK connection" width="320p" height="240">
+
 
 
 
