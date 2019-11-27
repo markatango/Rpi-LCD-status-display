@@ -74,5 +74,3 @@ This script installs additional `apt` and `pip` packages, and modifies `cmdline.
 15) `sudo systemctl enable amya-logo-2`
 16) `sudo systemctl start amya-logo-2`
 
-## Behavior
-
