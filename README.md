@@ -22,12 +22,9 @@ If the IoT node acquires an IP address, then the LCD background color is GREEN a
 4) Install microSD card into IoT node and apply power. Boot up process takes a few minutes; wait until login prompt appears
 5) Confirm the device is reachable via `ssh` using default Raspberry pi username and password.
 
-### Standard provisioning
-6) Provision IoT node with `amya-node-deploy`
-
 ### Install Pillow:
-7) From provisioning server, ssh to <default_username>@<Iot_node_IP>
-8) Install pre-requisite software into IoT node:
+6) From provisioning server, ssh to <default_username>@<Iot_node_IP>
+7) Install pre-requisite software into IoT node:
 
 (Reference: https://www.techcoil.com/blog/how-to-setup-python-imaging-library-pillow-on-raspbian-stretch-lite-for-processing-images-on-your-raspberry-pi/)
 
@@ -43,12 +40,12 @@ sudo apt-get install libtiff5 -y
 sudo pip install pillow
 ```
 ### Clone this repo into `/opt`
-9) `cd /opt`
-10) `sudo git clone https://github.com/miyachiamericaeurope/amya-status-display.git`
+8) `cd /opt`
+9) `sudo git clone https://github.com/markatango/Rpi-LCD-status-display.git`
 
 ### Configure LCD screen
-11) `sudo /boot/adafruit-pitft.sh`
-12) Answer questions as follows:
+10) `sudo /boot/adafruit-pitft.sh`
+11) Answer questions as follows:
 ```
   Select configuration:
   1. PiTFT 2.4", 2.8" or 3.2" resistive (240x320)
@@ -71,10 +68,10 @@ sudo pip install pillow
 
 This script installs additional `apt` and `pip` packages, and modifies `cmdline.txt` and `config.txt`.
 
-13) Reboot system at prompt
+1123) Reboot system at prompt
 
 ### Install service
-14) `sudo cp amya-logo-2.service /etc/systemd/system`
-15) `sudo systemctl enable amya-logo-2`
-16) `sudo systemctl start amya-logo-2`
+13) `sudo cp rpi-logo-2.service /etc/systemd/system`
+14) `sudo systemctl enable rpi-logo-2`
+15) `sudo systemctl start rpi-logo-2`
 
