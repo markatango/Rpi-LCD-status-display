@@ -1,4 +1,4 @@
-# amya-status-display
+# Rpi-LCD-status-display
 
 Displays network and hostname information on adapitft LCD display.  
 
