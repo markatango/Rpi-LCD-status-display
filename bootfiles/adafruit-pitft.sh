@@ -261,7 +261,7 @@ function install_console() {
     echo "Set up main console turn on"
     if ! grep -q 'fbcon=map:10 fbcon=font:VGA8x8' /boot/cmdline.txt; then
         echo "Updating /boot/cmdline.txt"
-        sed -i 's/rootwait/rootwait fbcon=map:10 fbcon=font:VGA8x8/g' "/boot/cmdline.txt"
+        sed -i 's/rootwait/rootwait logo.nologo fbcon=map:10 fbcon=font:VGA8x8/g' "/boot/cmdline.txt"
     else
         echo "/boot/cmdline.txt already updated"
     fi
