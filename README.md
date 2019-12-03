@@ -78,3 +78,7 @@ This script installs additional `apt` and `pip` packages, and modifies `cmdline.
 15) `sudo systemctl enable amya-logo-2`
 16) `sudo systemctl start amya-logo-2`
 
+### Finally, as suggested by the zymbit community and tested to prevent random zkifc "Failed to connect to (NTP) server" errors:
+17) sudo timedatectl set-ntp true
+
+
