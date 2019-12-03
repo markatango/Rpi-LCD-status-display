@@ -75,3 +75,7 @@ This script installs additional `apt` and `pip` packages, and modifies `cmdline.
 14) `sudo systemctl enable rpi-logo-2`
 15) `sudo systemctl start rpi-logo-2`
 
+### Finally, as suggested by the zymbit community and tested to prevent random zkifc "Failed to connect to (NTP) server" errors:
+17) sudo timedatectl set-ntp true
+
+
