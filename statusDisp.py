@@ -26,17 +26,18 @@ def makeImage():
     img.save('pil_text.png')
 
 def showImage():
-    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 pil_text.png'
+    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 5 -1 pil_text.png'
     args = shlex.split(cmd)
-    subprocess.run(args)
-
+    sppid = subprocess.run(args)
+#    print("subprocess pid = {}".format(sppid.pid))
 def main():
     makeImage()
     showImage()
 
 
 if __name__ == "__main__":
+
     while True:
        main()
-       sleep(10)
+       sleep(5)
 
