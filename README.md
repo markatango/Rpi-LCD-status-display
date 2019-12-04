@@ -73,12 +73,20 @@ This script installs additional `apt` and `pip` packages, and modifies `cmdline.
 
 13) Reboot system at prompt
 
+### HACK?? create symlinks for framebuffer
+See: [!link](https://raspberrypi.stackexchange.com/questions/24180/how-can-i-refresh-image-displayed-by-fbi-without-black-screen-transition)
+14) Create symlinks to point to the target image
+```
+ln -s pil_text.png image1.png
+ln -s pil_text.png image2.png
+```
+
 ### Install service
-14) `sudo cp amya-logo-2.service /etc/systemd/system`
-15) `sudo systemctl enable amya-logo-2`
-16) `sudo systemctl start amya-logo-2`
+15) `sudo cp amya-logo-2.service /etc/systemd/system`
+16) `sudo systemctl enable amya-logo-2`
+17) `sudo systemctl start amya-logo-2`
 
 ### Finally, as suggested by the zymbit community and tested to prevent random zkifc "Failed to connect to (NTP) server" errors:
-17) sudo timedatectl set-ntp true
+18) sudo timedatectl set-ntp true
 
 
