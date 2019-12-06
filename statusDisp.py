@@ -39,7 +39,7 @@ def makeImage():
     d = ImageDraw.Draw(img)
     d.text((8,110), "Network: {}".format(net), fill=(255,255,255), font=font)
     d.text((8,140), "IP: {}".format(host), fill=(255,255,255), font=font)
-    d.text((8,180), "Hostname: {}".format(hosthame), fill=(255,255,255), font=font)
+    d.text((8,180), "Hostname: {}".format(hostname), fill=(255,255,255), font=font)
     img.save('pil_text.png')
 
 def testActive():
