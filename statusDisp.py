@@ -53,7 +53,12 @@ def testActive():
 def main():
     cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png pil_text.png pil_text.png'
     args = shlex.split(cmd)
-    sppid = subprocess.run(args, timeout=None)
+    p = subprocess.Popen(args, stdout=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    with open('fbi.log', 'wb') as fp:
+       fp.write(stdout)
+       if stderr:
+           fp.write(stderr)
 
     while True:
        makeImage()
