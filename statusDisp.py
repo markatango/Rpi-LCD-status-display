@@ -6,10 +6,26 @@ import shlex
 import sys, os
 from time import sleep
 
-def makeImage():
+def _procCmds(cmds):
+    p = [0 for c in cmds]
+    for i,c in enumerate(cmds):
+       args = shlex.split(c)
+       if i == 0: # first cmd
+           p[i] = Popen(args, stdout=PIPE)
+       else:
+           p[i] = Popen(args, stdin=p[i-1].stdout, stdout=PIPE)
+    p[0].stdout.close()
+    resp = str(p[len(p)-1].communicate()[0],'utf-8')
+    return resp
+
+def _gatherInfo():
     sip = ShowIP()
-    hname = sip.getHostname()
+    hostname = sip.getHostname()
     connected, net, host = sip.getIPText()
+    return connected, net, host, hostname
+
+def makeImage():
+    connected, net, host, hostname = _gatherInfo()
 
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     font = ImageFont.truetype(font_path, 20)
@@ -23,7 +39,7 @@ def makeImage():
     d = ImageDraw.Draw(img)
     d.text((8,110), "Network: {}".format(net), fill=(255,255,255), font=font)
     d.text((8,140), "IP: {}".format(host), fill=(255,255,255), font=font)
-    d.text((8,180), "Hostname: {}".format(hname), fill=(255,255,255), font=font)
+    d.text((8,180), "Hostname: {}".format(hosthame), fill=(255,255,255), font=font)
     img.save('pil_text.png')
 
 def testActive():
@@ -31,16 +47,7 @@ def testActive():
     cmd2 = 'grep fbi' 
     cmd3 = 'grep -o noverbose'
     cmds = [cmd1, cmd2, cmd3]
-    p = [0 for c in cmds]
-    for i,c in enumerate(cmds):
-       args = shlex.split(c)
-       if i == 0: # first cmd
-           p[i] = Popen(args, stdout=PIPE)
-       else:
-           p[i] = Popen(args, stdin=p[i-1].stdout, stdout=PIPE)
-    p[0].stdout.close()
-    resp = str(p[len(p)-1].communicate()[0],'utf-8')
- #   print("test output: {}, bool:{}".format(resp, 'noverbose' in resp))
+    resp = _procCmds(cmds)
     return 'noverbose' in resp
 
 def main():
