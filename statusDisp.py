@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 import shlex
 import sys, os
 from time import sleep
+from datetime import datetime
 
 def _procCmds(cmds):
     p = [0 for c in cmds]
@@ -24,11 +25,19 @@ def _gatherInfo():
     connected, net, host = sip.getIPText()
     return connected, net, host, hostname
 
+def _getTime():
+    now = datetime.now()
+    ascnow = now.strftime("%b %-d, %Y")
+    asctime = now.strftime("%I:%-M")
+    return (ascnow, asctime)
+
 def makeImage():
     connected, net, host, hostname = _gatherInfo()
+    dt, dtime = _getTime()
 
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
     font = ImageFont.truetype(font_path, 20)
+    bigfont = ImageFont.truetype(font_path, 22)
 
     if connected:
         screenColor = "green.png"
@@ -37,9 +46,12 @@ def makeImage():
     img = Image.open(screenColor)
 
     d = ImageDraw.Draw(img)
-    d.text((8,110), "Network: {}".format(net), fill=(255,255,255), font=font)
-    d.text((8,140), "IP: {}".format(host), fill=(255,255,255), font=font)
-    d.text((8,180), "Hostname: {}".format(hostname), fill=(255,255,255), font=font)
+    fill = (255,255,255)
+    d.text((8,110), "Network: {}".format(net), fill=fill, font=font)
+    d.text((8,140), "IP: {}".format(host), fill=fill, font=font)
+    d.text((8,180), "Hostname: {}".format(hostname), fill=fill, font=font)
+    d.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
+    d.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
     img.save('pil_text.png')
 
 def testActive():
