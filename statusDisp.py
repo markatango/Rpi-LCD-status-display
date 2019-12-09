@@ -28,7 +28,7 @@ def _gatherInfo():
 def _getTime():
     now = datetime.now()
     ascnow = now.strftime("%b %-d, %Y")
-    asctime = now.strftime("%I:%-M")
+    asctime = now.strftime("%-I:%M %p")
     return (ascnow, asctime)
 
 def makeImage():
@@ -69,7 +69,7 @@ def main():
 
     while True:
        makeImage()
-       sleep(1)
+       sleep(1.1414)
        testRes = testActive()
 
        if not testRes:
