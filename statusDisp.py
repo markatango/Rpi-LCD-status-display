@@ -22,8 +22,8 @@ def _procCmds(cmds):
 def _gatherInfo():
     sip = ShowIP()
     hostname = sip.getHostname()
-    connected, net, host = sip.getIPText()
-    return connected, net, host, hostname
+    connected, net, host, mac = sip.getIPText()
+    return connected, net, host, mac, hostname
 
 def _getTime():
     now = datetime.now()
@@ -32,7 +32,7 @@ def _getTime():
     return (ascnow, asctime)
 
 def makeImage():
-    connected, net, host, hostname = _gatherInfo()
+    connected, net, host, mac, hostname = _gatherInfo()
     dt, dtime = _getTime()
 
     font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -47,9 +47,10 @@ def makeImage():
 
     d = ImageDraw.Draw(img)
     fill = (255,255,255)
-    d.text((8,110), "Network: {}".format(net), fill=fill, font=font)
-    d.text((8,140), "IP: {}".format(host), fill=fill, font=font)
-    d.text((8,180), "Hostname: {}".format(hostname), fill=fill, font=font)
+    d.text((8,105), "Network: {}".format(net), fill=fill, font=font)
+    d.text((8,131), "IP: {}".format(host), fill=fill, font=font)
+    d.text((8,157), "MAC: {}".format(mac), fill=fill, font=font)
+    d.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
     d.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
     d.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
     img.save('pil_text.png')
