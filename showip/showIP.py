@@ -38,16 +38,12 @@ class ShowIP:
      net = re.findall(pat, resp)
      pat = "link src ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
      host = re.findall(pat, resp)
-     mac = hex(uuid.getnode())
      mac = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1])
      if net and host and not "169" in host:
         net = net[0]
         host = host[0]
         connected = True
-        #mac = hex(uuid.getnode())
-        #macbytes = [str(mac)[i:i+2] for i in range(2,14,2)]
         macstr = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]).upper()
-        #macstr = ':'.join(macbytes).upper()
         res = (connected, net, host, macstr)
      else:
         res = defaultRes
