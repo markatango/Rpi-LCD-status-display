@@ -74,7 +74,7 @@ This script installs additional `apt` and `pip` packages, and modifies `cmdline.
 13) Reboot system at prompt
 
 ### HACK?? create symlinks for framebuffer
-See: [!link](https://raspberrypi.stackexchange.com/questions/24180/how-can-i-refresh-image-displayed-by-fbi-without-black-screen-transition)
+See: [How can I refresh image displayed by fbi without black screen transition?](https://raspberrypi.stackexchange.com/questions/24180/how-can-i-refresh-image-displayed-by-fbi-without-black-screen-transition)
 14) Create symlinks to point to the target image
 ```
 ln -s pil_text.png image1.png
