@@ -1,11 +1,11 @@
-# Rpi-LCD-status-display
+# amya-status-dispay
 
 Displays network and hostname information on adapitft LCD display.  
 
 ## Behavior
-If the IoT node acquires an IP address, then the LCD background color is GREEN and displays the IPv4 network address (CIDR), IPv4 host address, and hostname.  If the IoT node fails to acquire an IP address, then the LCD background color is RED.
+If the IoT node acquires an IP address, then the LCD background color is GREEN and displays the IPv4 network address (CIDR), IPv4 host address, MAC address, and hostname.  If the IoT node fails to acquire an IP address, then the LCD background color is RED.
 
-<img src="https://github.com/markatango/amya-status-display/blob/media/NoConnection.jpg" alt="No connection" width="320p" height="240"> <img src="https://github.com/markatango/amya-status-display/blob/media/Connection.jpg" alt="OK connection" width="320p" height="240">
+<img src="https://github.com/miyachiamericaeurope/amya-status-display/blob/media/NoConnection.jpg" alt="No connection" width="320p" height="240"> <img src="https://github.com/miyachiamericaeurope/amya-status-display/blob/media/Connection.jpg" alt="OK connection" width="320p" height="240">
 
 
 ## Installation
@@ -68,12 +68,20 @@ sudo pip install pillow
 
 This script installs additional `apt` and `pip` packages, and modifies `cmdline.txt` and `config.txt`.
 
-1123) Reboot system at prompt
+12) Reboot system at prompt
+
+### HACK?? create symlinks for framebuffer
+See: [How can I refresh image displayed by fbi without black screen transition?](https://raspberrypi.stackexchange.com/questions/24180/how-can-i-refresh-image-displayed-by-fbi-without-black-screen-transition)
+13) Create symlinks to point to the target image
+```
+ln -s pil_text.png image1.png
+ln -s pil_text.png image2.png
+```
 
 ### Install service
-13) `sudo cp rpi-logo-2.service /etc/systemd/system`
-14) `sudo systemctl enable rpi-logo-2`
-15) `sudo systemctl start rpi-logo-2`
+14) `sudo cp amya-logo-2.service /etc/systemd/system`
+15) `sudo systemctl enable amya-logo-2`
+16) `sudo systemctl start amya-logo-2`
 
 ### Finally, as suggested by the zymbit community and tested to prevent random zkifc "Failed to connect to (NTP) server" errors:
 17) sudo timedatectl set-ntp true

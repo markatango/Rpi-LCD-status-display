@@ -3,7 +3,7 @@ import subprocess as sp
 from subprocess import Popen, PIPE
 import shlex
 import re
-
+import uuid
 
 class ShowIP:
    def __init__(self):
@@ -29,22 +29,25 @@ class ShowIP:
      resp = str(p[len(p)-1].communicate()[0], 'utf-8')
      return resp
 
+
    def getIPText(self):
+     defaultRes = (False, '','','')
+
      resp = self._getPipedResp(self.cmds_2)
      pat = "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}"
      net = re.findall(pat, resp)
-
      pat = "link src ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})"
      host = re.findall(pat, resp)
-     if not net or not host or "169" in host:
-        net = ''
-        host = ''
-        connected = False
-     else:
+     mac = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1])
+     if net and host and not "169" in host:
         net = net[0]
         host = host[0]
         connected = True
-     return connected, net, host
+        macstr = ':'.join(['{:02x}'.format((uuid.getnode() >> ele) & 0xff) for ele in range(0,8*6,8)][::-1]).upper()
+        res = (connected, net, host, macstr)
+     else:
+        res = defaultRes
+     return res
 
    def getHostname(self):
      p = sp.run("hostname", capture_output=True)
