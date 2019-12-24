@@ -53,7 +53,13 @@ def makeImage():
     d.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
     d.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
     d.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
+    cmd = 'rm ./pil*'
+    args = shlex.split(cmd)
+    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
     img.save('pil_text.png')
+    # cmd = 'mv pil_text.temp.png pil_text.png'
+    # args = shlex.split(cmd)  
+    # p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
 
 def testActive():
     cmd1 = 'ps aux'
@@ -64,25 +70,29 @@ def testActive():
     return 'noverbose' in resp
 
 def main():
-    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png pil_text.png pil_text.png'
+    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
     args = shlex.split(cmd)
     p = subprocess.Popen(args, stdout=subprocess.PIPE)
     stdout, stderr = p.communicate()
-    with open('fbi.log', 'wb') as fp:
+    with open('fbi.log', 'wb') as fp: 
        fp.write(stdout)
        if stderr:
            fp.write(stderr)
-
+           
     while True:
        makeImage()
        sleep(1.1414)
        testRes = testActive()
-
        if not testRes:
-          print("test output Failed: {}".format(testRes))
-          cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png pil_text.png pil_text.png'
-          args = shlex.split(cmd)
-          sppid = subprocess.run(args, timeout=None)
+          # print("test output Failed: {}".format(testRes))
+          # cmd = 'killall fbi'
+          # args = shlex.split(cmd)
+          # sppid = subprocess.run(args)
+          
+          # cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
+          # args = shlex.split(cmd)
+          # # sppid = subprocess.run(args, timeout=None)
+          return
 
 
 if __name__ == "__main__":
