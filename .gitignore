@@ -3,3 +3,4 @@ showip/__pycache__/
 pil_text.png
 showip/*.pyc
 
+venv*/
