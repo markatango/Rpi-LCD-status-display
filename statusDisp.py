@@ -6,6 +6,7 @@ import shlex
 import sys, os
 from time import sleep
 from datetime import datetime
+import hashlib
 
 def _procCmds(cmds):
     p = [0 for c in cmds]
@@ -53,9 +54,9 @@ def makeImage():
     d.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
     d.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
     d.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
-    cmd = 'rm ./pil*'
-    args = shlex.split(cmd)
-    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+#    cmd = 'rm ./pil*'
+#    args = shlex.split(cmd)
+#    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
     img.save('pil_text.png')
     # cmd = 'mv pil_text.temp.png pil_text.png'
     # args = shlex.split(cmd)  
@@ -70,29 +71,35 @@ def testActive():
     return 'noverbose' in resp
 
 def main():
-    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
-    args = shlex.split(cmd)
-    p = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    with open('fbi.log', 'wb') as fp: 
-       fp.write(stdout)
-       if stderr:
-           fp.write(stderr)
+    # cli commands
+    updateDisplayCmd = 'fbi -d /dev/fb0 -noverbose -once -cachemem 1 -nocomments -readahead -T 1 pil_text.png'
+    killFbiCmd = 'pkill fbi'
+
+    # internal function to execute cli commands
+    def execute_cmd(cmd):
+        args = shlex.split(cmd)
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate()
            
+    
+    imageHashWas=None
+    imageHashNow=None
     while True:
-       makeImage()
-       sleep(1.1414)
-       testRes = testActive()
-       if not testRes:
-          # print("test output Failed: {}".format(testRes))
-          # cmd = 'killall fbi'
-          # args = shlex.split(cmd)
-          # sppid = subprocess.run(args)
-          
-          # cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
-          # args = shlex.split(cmd)
-          # # sppid = subprocess.run(args, timeout=None)
-          return
+        # the display, once written to by fbi, does not need fbi running in the
+        # background, so we just just blindly issue a command to kill it.
+        execute_cmd(killFbiCmd)
+
+        # make a new image every loop and capture an sha1 hash of the image
+        makeImage()
+        imageHashNow=hashlib.sha1(open('pil_text.png', 'rb').read()).hexdigest()
+
+        # here we detect if the image has changed
+        # we dont write to the display unless the image has changed 
+        if imageHashNow != imageHashWas:
+            execute_cmd(updateDisplayCmd)
+        imageHashWas = imageHashNow
+        
+        sleep(1)
 
 
 if __name__ == "__main__":
