@@ -84,6 +84,12 @@ def main():
     
     imageHashWas=None
     imageHashNow=None
+
+    # get two instances of fbi running initially.  this, for some reason, prevents killing
+    # the fbi processes from blanking out the display and showing "oops terminated" in console
+    makeImage()
+    execute_cmd(updateDisplayCmd)
+    execute_cmd(updateDisplayCmd)
     while True:
         # the display, once written to by fbi, does not need fbi running in the
         # background, so we just just blindly issue a command to kill it.
