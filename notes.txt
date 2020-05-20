@@ -1,5 +1,27 @@
 nothing worthwhile loaded: blank / black and white text, if any.
+ - need to figure out how to diable the console and splash screen
+
 loaded with software but some services not working: RED with list of services not working
+ - we can test if a node has been provisioned/claimed by a server by checking the existence of /opt/easy-rsa/easyrsa3/easyrsa/client-node.crt
+ - the presense of this crt means it was placed there by an iot server (provisioned)
+ 
+ - sudo systemctl list-units --system --all | grep amya             can be used to list the status of the services
+
+   ● amya-cmd-resp-controllerd.service                                       masked    inactive dead      amya-cmd-resp-controllerd.service                                                     
+   ● amya-cmd-resp-slaved.service                                            loaded    failed   failed    AMYA Slave Node - command/response daemon                                             
+     amya-logo-2.service                                                     loaded    inactive dead      Amada green field                                                                     
+     amya-monitor-ramdisk.service                                            loaded    active   running   AMYA Monitor RAM backed pickle jar                                                    
+     amya-node-api.service                                                   loaded    active   running   AMYA node RESTful API                                                                 
+   ● amya-publish-pickled.service                                            loaded    failed   failed    AMYA Slave Node - publish pickled reports daemon                                      
+     amya-serial-polld.service                                               loaded    active   running   AMYA Slave Node - serial polling daemon                                               
+     amya-serial-server.service                                              loaded    active   running   AMYA node Serial Client Server 
+
 loaded and not provisioned: RED with good IP address (if DHCP worked) and message saying "ready for provisioning"
+ - again, we use the presence of the client-node certificate to know if it has been provisioned 
+ - 
+
 provisioned but not connected to network: RED with local link IP. and message saying <:equpment_model> and maybe other provision tags.
+ - we probably want to display the server hostname that has claimed the node.  it can be found in /opt/amya/configs/pickled.config.json.
+
 everything hunky dory : GREEN, good IP, clock, no error messages.
+ - it can be asssumed that the node is connected and communicating with the server if the amya-publish-pickled.service is active and running
