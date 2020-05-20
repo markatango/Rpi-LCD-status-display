@@ -1,0 +1,5 @@
+nothing worthwhile loaded: blank / black and white text, if any.
+loaded with software but some services not working: RED with list of services not working
+loaded and not provisioned: RED with good IP address (if DHCP worked) and message saying "ready for provisioning"
+provisioned but not connected to network: RED with local link IP. and message saying <:equpment_model> and maybe other provision tags.
+everything hunky dory : GREEN, good IP, clock, no error messages.
