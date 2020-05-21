@@ -74,12 +74,15 @@ def main():
     # cli commands
     updateDisplayCmd = 'fbi -d /dev/fb0 -noverbose -once -cachemem 1 -nocomments -readahead -T 1 pil_text.png'
     killFbiCmd = 'pkill fbi'
+    getFbiPid = 'pgrep fbi'
+    killPid = 'kill {}'
 
     # internal function to execute cli commands
     def execute_cmd(cmd):
         args = shlex.split(cmd)
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
-        stdout, stderr = p.communicate()
+        return p.communicate()
+        #stdout, stderr = p.communicate()
            
     
     imageHashWas=None
@@ -89,11 +92,11 @@ def main():
     # the fbi processes from blanking out the display and showing "oops terminated" in console
     makeImage()
     execute_cmd(updateDisplayCmd)
-    execute_cmd(updateDisplayCmd)
+
     while True:
         # the display, once written to by fbi, does not need fbi running in the
         # background, so we just just blindly issue a command to kill it.
-        execute_cmd(killFbiCmd)
+        #execute_cmd(killFbiCmd)
 
         # make a new image every loop and capture an sha1 hash of the image
         makeImage()
@@ -103,6 +106,12 @@ def main():
         # we dont write to the display unless the image has changed 
         if imageHashNow != imageHashWas:
             execute_cmd(updateDisplayCmd)
+            pid, _ = execute_cmd(getFbiPid)
+            pid = pid.decode('utf-8').strip().split('\n')
+            print(pid)
+            for n in pid[1:]: 
+                print(killPid.format(n))
+                execute_cmd(killPid.format(n))
         imageHashWas = imageHashNow
         
         sleep(1)
