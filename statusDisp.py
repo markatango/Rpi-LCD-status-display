@@ -100,8 +100,8 @@ def makeImage():
     textOverlay.text((8,131), "      IP: {}".format(host), fill=fill, font=font)
     textOverlay.text((8,157), "     MAC: {}".format(mac), fill=fill, font=font)
     textOverlay.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
-    #textOverlay.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
-    #textOverlay.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
+    textOverlay.text((14,70), "{}".format(dt), fill=fill, font=font)
+    textOverlay.text((164,70), "{}".format(dtime), fill=fill, font=font)
     bg.show()
     bg.save("pil_text.png")
 
