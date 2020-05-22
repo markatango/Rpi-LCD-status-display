@@ -94,7 +94,7 @@ def makeImage():
     
     verticalLineSpace = 0.3 # multiplier ie: .3 means 30%
 
-    fill = white
+    fill = black
 
     textOverlay.text((8,105), " Network: {}".format(net), fill=fill, font=font)
     textOverlay.text((8,131), "      IP: {}".format(host), fill=fill, font=font)
