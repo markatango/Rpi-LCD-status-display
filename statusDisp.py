@@ -33,7 +33,7 @@ def _getTime():
     asctime = now.strftime("%-I:%M %p")
     return (ascnow, asctime)
 
-def makeImage():
+def _makeImage():
     connected, net, host, mac, hostname = _gatherInfo()
     dt, dtime = _getTime()
 
@@ -62,6 +62,48 @@ def makeImage():
     # cmd = 'mv pil_text.temp.png pil_text.png'
     # args = shlex.split(cmd)  
     # p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+
+def makeImage():
+    connected, net, host, mac, hostname = _gatherInfo()
+    dt, dtime = _getTime()
+
+    canvasW, canvasH =(320, 240)
+    green = (34, 177, 76)
+    red = (222, 60, 60)
+    white = (255, 255, 255)
+    grey = (181, 181, 181)
+    black = (0,0,0)
+    
+    if connected:
+        screenColor = green
+    else:
+        screenColor = red
+    bg = Image.new('RGB', (canvasW, canvasH), screenColor)
+    
+    logo = Image.open("awt_logo.png")
+    logoW, logoH = logo.size
+    logoPastePos = (int((canvasW-logoW)/2), 3)
+    
+    bg.paste(logo, logoPastePos, logo)
+    
+    fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    fontSize = 17
+    font = ImageFont.truetype(fontPath, fontSize)
+    line = "this line of text fills the screen width"
+    textOverlay = ImageDraw.Draw(bg)
+    
+    verticalLineSpace = 0.3 # multiplier ie: .3 means 30%
+
+    fill = white
+
+    textOverlay.text((8,105), " Network: {}".format(net), fill=fill, font=font)
+    textOverlay.text((8,131), "      IP: {}".format(host), fill=fill, font=font)
+    textOverlay.text((8,157), "     MAC: {}".format(mac), fill=fill, font=font)
+    textOverlay.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
+    #textOverlay.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
+    #textOverlay.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
+    bg.show()
+    bg.save("pil_text.png")
 
 def testActive():
     cmd1 = 'ps aux'
