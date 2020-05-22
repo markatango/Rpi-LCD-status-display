@@ -8,6 +8,7 @@ from time import sleep
 from datetime import datetime
 import hashlib
 
+
 def _procCmds(cmds):
     p = [0 for c in cmds]
     for i,c in enumerate(cmds):
@@ -83,6 +84,9 @@ def main():
         p = subprocess.Popen(args, stdout=subprocess.PIPE)
         return p.communicate()
         #stdout, stderr = p.communicate()
+
+    # first things first.. lets start with a clean slate.. no running fbi processes
+    execute_cmd(killFbiCmd)
            
     
     imageHashWas=None
@@ -91,7 +95,15 @@ def main():
     # get two instances of fbi running initially.  this, for some reason, prevents killing
     # the fbi processes from blanking out the display and showing "oops terminated" in console
     makeImage()
+    logger.debug("starting the first fbi processes now..")
     execute_cmd(updateDisplayCmd)
+    pid, _ = execute_cmd(getFbiPid)
+    #mainPid = pid.pop(0).strip().decode('utf-8')
+    pid = pid.strip().decode('utf-8').split('\n')
+    if len(pid) > 1:
+        logger.debug("what the heck?! ..there should only be one fbi process running")
+    mainPid = pid.pop(0)
+    logger.debug("main fbi PID: {}".format(mainPid))
 
     while True:
         # the display, once written to by fbi, does not need fbi running in the
@@ -108,15 +120,52 @@ def main():
             execute_cmd(updateDisplayCmd)
             pid, _ = execute_cmd(getFbiPid)
             pid = pid.decode('utf-8').strip().split('\n')
-            print(pid)
-            for n in pid[1:]: 
-                print(killPid.format(n))
-                execute_cmd(killPid.format(n))
+            logger.debug("fbi processes: {}".format(pid))
+            pid.remove(mainPid)
+            if pid:
+                for n in pid:
+                #for n in pid[1:]: 
+                    logger.debug("killing fbi process: {}".format(n))
+                    execute_cmd(killPid.format(n))
         imageHashWas = imageHashNow
         
         sleep(1)
 
 
 if __name__ == "__main__":
+    import logging
+    import logging.handlers
+    import sys
+
+    #create local logger
+    logger = logging.getLogger(__name__)
+    LOG_TO_CONSOLE = True
+
+    if LOG_TO_CONSOLE:
+        handler = logging.StreamHandler(stream=sys.stdout)
+    else:
+        handler = logging.handlers.RotatingFileHandler(__file__+'.log', maxBytes=5000000, backupCount=1)
+
+    formatter = logging.Formatter(fmt='%(asctime)s %(name) -55s %(levelname)-9s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+
+    #create a logging whitelist - (comment out code in ~~ block to enable all child loggers)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    loggingWhitelist = ('root', '__main__')
+    class Whitelist(logging.Filter):
+        def __init__(self, *whitelist):
+            self.whitelist = [logging.Filter(name) for name in whitelist]
+        
+        def filter(self, record):
+            return any(f.filter(record) for f in self.whitelist)
+    #add the whitelist filter to the handler
+    handler.addFilter(Whitelist(*loggingWhitelist))
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    #assign the handler to root logger (we use the root logger so that we get output from all child logger used in other modules)
+    logging.root.addHandler(handler)
+    #set the logging level for root logger
+    logging.root.setLevel(logging.DEBUG)
+
     main()
 
