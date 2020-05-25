@@ -6,6 +6,8 @@ import shlex
 import sys, os
 from time import sleep
 from datetime import datetime
+import hashlib
+
 
 def _procCmds(cmds):
     p = [0 for c in cmds]
@@ -31,7 +33,7 @@ def _getTime():
     asctime = now.strftime("%-I:%M %p")
     return (ascnow, asctime)
 
-def makeImage():
+def _makeImage():
     connected, net, host, mac, hostname = _gatherInfo()
     dt, dtime = _getTime()
 
@@ -53,13 +55,55 @@ def makeImage():
     d.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
     d.text((100,14), "{}".format(dt), fill=fill, font=bigfont)
     d.text((100,50), "{}".format(dtime), fill=fill, font=bigfont)
-    cmd = 'rm ./pil*'
-    args = shlex.split(cmd)
-    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+#    cmd = 'rm ./pil*'
+#    args = shlex.split(cmd)
+#    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
     img.save('pil_text.png')
     # cmd = 'mv pil_text.temp.png pil_text.png'
     # args = shlex.split(cmd)  
     # p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+
+def makeImage():
+    connected, net, host, mac, hostname = _gatherInfo()
+    dt, dtime = _getTime()
+
+    canvasW, canvasH =(320, 240)
+    green = (34, 177, 76)
+    red = (222, 60, 60)
+    white = (255, 255, 255)
+    grey = (181, 181, 181)
+    black = (0,0,0)
+    
+    if connected:
+        screenColor = green
+    else:
+        screenColor = red
+    bg = Image.new('RGB', (canvasW, canvasH), screenColor)
+    
+    logo = Image.open("awt_logo.png")
+    logoW, logoH = logo.size
+    logoPastePos = (int((canvasW-logoW)/2), 3)
+    
+    bg.paste(logo, logoPastePos, logo)
+    
+    fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    fontSize = 17
+    font = ImageFont.truetype(fontPath, fontSize)
+    line = "this line of text fills the screen width"
+    textOverlay = ImageDraw.Draw(bg)
+    
+    verticalLineSpace = 0.3 # multiplier ie: .3 means 30%
+
+    fill = black
+
+    textOverlay.text((8,105), " Network: {}".format(net), fill=fill, font=font)
+    textOverlay.text((8,131), "      IP: {}".format(host), fill=fill, font=font)
+    textOverlay.text((8,157), "     MAC: {}".format(mac), fill=fill, font=font)
+    textOverlay.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
+    textOverlay.text((14,70), "{}".format(dt), fill=fill, font=font)
+    textOverlay.text((164,70), "{}".format(dtime), fill=fill, font=font)
+    bg.show()
+    bg.save("pil_text.png")
 
 def testActive():
     cmd1 = 'ps aux'
@@ -70,31 +114,100 @@ def testActive():
     return 'noverbose' in resp
 
 def main():
-    cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
-    args = shlex.split(cmd)
-    p = subprocess.Popen(args, stdout=subprocess.PIPE)
-    stdout, stderr = p.communicate()
-    with open('fbi.log', 'wb') as fp: 
-       fp.write(stdout)
-       if stderr:
-           fp.write(stderr)
+    # cli commands
+    updateDisplayCmd = 'fbi -d /dev/fb0 -noverbose -once -cachemem 1 -nocomments -readahead -T 1 pil_text.png'
+    killFbiCmd = 'pkill fbi'
+    getFbiPid = 'pgrep fbi'
+    killPid = 'kill {}'
+
+    # internal function to execute cli commands
+    def execute_cmd(cmd):
+        args = shlex.split(cmd)
+        p = subprocess.Popen(args, stdout=subprocess.PIPE)
+        return p.communicate()
+        #stdout, stderr = p.communicate()
+
+    # first things first.. lets start with a clean slate.. no running fbi processes
+    execute_cmd(killFbiCmd)
            
+    
+    imageHashWas=None
+    imageHashNow=None
+
+    # get two instances of fbi running initially.  this, for some reason, prevents killing
+    # the fbi processes from blanking out the display and showing "oops terminated" in console
+    makeImage()
+    logger.debug("starting the first fbi processes now..")
+    execute_cmd(updateDisplayCmd)
+    pid, _ = execute_cmd(getFbiPid)
+    #mainPid = pid.pop(0).strip().decode('utf-8')
+    pid = pid.strip().decode('utf-8').split('\n')
+    if len(pid) > 1:
+        logger.debug("what the heck?! ..there should only be one fbi process running")
+    mainPid = pid.pop(0)
+    logger.debug("main fbi PID: {}".format(mainPid))
+
     while True:
-       makeImage()
-       sleep(1.1414)
-       testRes = testActive()
-       if not testRes:
-          # print("test output Failed: {}".format(testRes))
-          # cmd = 'killall fbi'
-          # args = shlex.split(cmd)
-          # sppid = subprocess.run(args)
-          
-          # cmd = 'fbi -d /dev/fb0 -noverbose -nocomments -T 1 -t 2 -cachemem 0 pil_text.png image1.png image2.png'
-          # args = shlex.split(cmd)
-          # # sppid = subprocess.run(args, timeout=None)
-          return
+        # the display, once written to by fbi, does not need fbi running in the
+        # background, so we just just blindly issue a command to kill it.
+        #execute_cmd(killFbiCmd)
+
+        # make a new image every loop and capture an sha1 hash of the image
+        makeImage()
+        imageHashNow=hashlib.sha1(open('pil_text.png', 'rb').read()).hexdigest()
+
+        # here we detect if the image has changed
+        # we dont write to the display unless the image has changed 
+        if imageHashNow != imageHashWas:
+            execute_cmd(updateDisplayCmd)
+            pid, _ = execute_cmd(getFbiPid)
+            pid = pid.decode('utf-8').strip().split('\n')
+            logger.debug("fbi processes: {}".format(pid))
+            pid.remove(mainPid)
+            if pid:
+                for n in pid:
+                #for n in pid[1:]: 
+                    logger.debug("killing fbi process: {}".format(n))
+                    execute_cmd(killPid.format(n))
+        imageHashWas = imageHashNow
+        
+        sleep(1)
 
 
 if __name__ == "__main__":
+    import logging
+    import logging.handlers
+    import sys
+
+    #create local logger
+    logger = logging.getLogger(__name__)
+    LOG_TO_CONSOLE = True
+
+    if LOG_TO_CONSOLE:
+        handler = logging.StreamHandler(stream=sys.stdout)
+    else:
+        handler = logging.handlers.RotatingFileHandler(__file__+'.log', maxBytes=5000000, backupCount=1)
+
+    formatter = logging.Formatter(fmt='%(asctime)s %(name) -55s %(levelname)-9s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+
+    #create a logging whitelist - (comment out code in ~~ block to enable all child loggers)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    loggingWhitelist = ('root', '__main__')
+    class Whitelist(logging.Filter):
+        def __init__(self, *whitelist):
+            self.whitelist = [logging.Filter(name) for name in whitelist]
+        
+        def filter(self, record):
+            return any(f.filter(record) for f in self.whitelist)
+    #add the whitelist filter to the handler
+    handler.addFilter(Whitelist(*loggingWhitelist))
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    #assign the handler to root logger (we use the root logger so that we get output from all child logger used in other modules)
+    logging.root.addHandler(handler)
+    #set the logging level for root logger
+    logging.root.setLevel(logging.DEBUG)
+
     main()
 
