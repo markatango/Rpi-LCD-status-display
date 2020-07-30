@@ -46,6 +46,11 @@ def _gatherInfo():
     goingUporDown = False
     activity = False
     return connected, net, host, mac, hostname
+    
+def _isLocalLink(IP):
+    regex = r"^169.254"
+    m = re.match(regex,IP)
+    return m != None
 
 def _getTime():
     now = datetime.now()
@@ -165,7 +170,7 @@ def makeImage_2():
     serviceStatus = _gatherServiceInfo()
     isConfigured = os.path.isfile('/storage/opt/easy-rsa/easyrsa3/pki/ca.crt')
     canReachServer = serviceStatus["amya-publish-pickled.service"]
-    isLocalLink = False # not implemented yet; detect "169" in IP address
+    isLocalLink = _isLocalLink(host) 
     goingUporDown = False # don't know how to detect this yet.
     activity = True # don't know how to detect this yet.
 
