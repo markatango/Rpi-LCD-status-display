@@ -154,6 +154,8 @@ def makeImage_2():
     
     serviceStatus = _gatherServiceInfo()
     provisioned = serviceStatus["amya-publish-pickled.service"]
+    canReachServer = serviceStatus["amya-publish-pickled.service"]
+    isLocalLink = False # not implemented yet
     goingUporDown = False # don't know how to detect this yet.
     activity = True # don't know how to detect this yet.
     
@@ -179,16 +181,16 @@ def makeImage_2():
    # '- BLUE: (as in  holding its breath...): All good, but no serial data in past X minutes
    # '- Font and font color: maximum readability with given background from wide angle
     
-    if not goingUporDown and connected and provisioned and activity:
+    if not goingUporDown and connected and not isLocalLink and provisioned and activity:
         screenColor = green
         fill = greenTextFill
-    elif not goingUporDown and connected and provisioned and not activity:
+    elif not goingUporDown and connected and not isLocalLink and provisioned and not activity:
         screenColor = blue
         fill = blueTextFill
     elif not goingUporDown and connected and not provisioned:
-        screenColor = yellow
-        fill = yellowTextFill
-    elif not goingUporDown and not connected: 
+        screenColor = orange
+        fill = orangeTextFill
+    elif not goingUporDown and not connected or (connected and isLocalLink) : 
         screenColor = red
         fill = redTextFill
     elif goingUporDown:
