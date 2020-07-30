@@ -128,7 +128,6 @@ def makeImage():
 		
 def makeImage_2():
 
-
     canvasW, canvasH =(320, 240)
     
     white = (255, 255, 255)
@@ -164,7 +163,12 @@ def makeImage_2():
     # ]
     
     serviceStatus = _gatherServiceInfo()
-    isConfigured = True # don't know how to detect this yet.  Perhaps detect non-None in equipment_model config element?
+    with open(os.devnull, 'wb') as devnull:      
+      try:    
+        subprocess.check_call(['ls', '/storage/opt/easy-rsa/easyrsa3/pki/ca.crt'], stdout=devnull, stderr=subprocess.STDOUT) == 0
+        isConfigured = True
+      except:
+        isConfigured = False
     canReachServer = serviceStatus["amya-publish-pickled.service"]
     isLocalLink = False # not implemented yet; detect "169" in IP address
     goingUporDown = False # don't know how to detect this yet.
@@ -181,27 +185,7 @@ def makeImage_2():
    # '- GREEN: all good: IP address, services running normally
    # '- BLUE: (as in  holding its breath...): All good, but no serial data in past X minutes
    # '- Font and font color: maximum readability with given background from wide angle
-    
-    # if not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and activity:
-        # screenColor = green
-        # fill = greenTextFill
-    # elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and not activity:
-        # screenColor = blue
-        # fill = blueTextFill
-    # elif not goingUporDown and connected and not isLocalLink and not isConfigured and canReachServer :
-        # screenColor = orange
-        # fill = orangeTextFill
-    # elif not goingUporDown and not connected or (connected and isLocalLink) or (connected and not canReachServer): 
-        # screenColor = red
-        # fill = redTextFill
-    # elif goingUporDown:
-        # screenColor = black
-        # fill = blackTextFill
-    # else:
-        # screenColor = black
-        # fill = blackTextFill
-        
-        
+
     if not goingUporDown and not connected or (connected and isLocalLink): 
         screenColor = red
         fill = redTextFill
