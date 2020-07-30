@@ -163,12 +163,7 @@ def makeImage_2():
     # ]
     
     serviceStatus = _gatherServiceInfo()
-    with open(os.devnull, 'wb') as devnull:      
-      try:    
-        subprocess.check_call(['ls', '/storage/opt/easy-rsa/easyrsa3/pki/ca.crt'], stdout=devnull, stderr=subprocess.STDOUT) == 0
-        isConfigured = True
-      except:
-        isConfigured = False
+    isConfigured = os.path.isfile('/storage/opt/easy-rsa/easyrsa3/pki/ca.crt')
     canReachServer = serviceStatus["amya-publish-pickled.service"]
     isLocalLink = False # not implemented yet; detect "169" in IP address
     goingUporDown = False # don't know how to detect this yet.
