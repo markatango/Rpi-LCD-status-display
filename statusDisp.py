@@ -152,14 +152,7 @@ def makeImage_2():
     connected, net, host, mac, hostname = _gatherInfo()
     dt, dtime = _getTime()
     
-    serviceStatus = _gatherServiceInfo()
-    provisioned = serviceStatus["amya-publish-pickled.service"]
-    canReachServer = serviceStatus["amya-publish-pickled.service"]
-    isLocalLink = False # not implemented yet
-    goingUporDown = False # don't know how to detect this yet.
-    activity = True # don't know how to detect this yet.
-    
-    # serviceList = [
+        # serviceList = [
         # 'amya-cmd-resp-controllerd.service',
         # 'amya-cmd-resp-slaved.service',
         # 'amya-logo-2.service',
@@ -170,29 +163,60 @@ def makeImage_2():
         # 'amya-serial-server.service'
     # ]
     
+    serviceStatus = _gatherServiceInfo()
+    isConfigured = True # don't know how to detect this yet.  Perhaps detect non-None in equipment_model config element?
+    canReachServer = serviceStatus["amya-publish-pickled.service"]
+    isLocalLink = False # not implemented yet; detect "169" in IP address
+    goingUporDown = False # don't know how to detect this yet.
+    activity = True # don't know how to detect this yet.
+
+    
    # '- Operational display
    # '- Add badge that flashes when a serial string is RCVD from RW unit but failed publication; use a second badge type if also successful publication to the broker
    # '- Change background colors:
    # '- Black on boot up and programmatic or commanded shut down (can't do anything on ACPI)
    # '- RED: no LAN connection or there is a local-link IP address
-   # '- ORANGE: Got LAN IP addresss, but not provisioned
-   # '- YELLOW:  Got IP addresss, is provisioned, cannot reach server
+   # '- ORANGE: Got LAN IP addresss, but not configured
+   # '- YELLOW:  Got IP addresss, is configured, cannot reach server
    # '- GREEN: all good: IP address, services running normally
    # '- BLUE: (as in  holding its breath...): All good, but no serial data in past X minutes
    # '- Font and font color: maximum readability with given background from wide angle
     
-    if not goingUporDown and connected and not isLocalLink and provisioned and activity:
-        screenColor = green
-        fill = greenTextFill
-    elif not goingUporDown and connected and not isLocalLink and provisioned and not activity:
-        screenColor = blue
-        fill = blueTextFill
-    elif not goingUporDown and connected and not provisioned:
-        screenColor = orange
-        fill = orangeTextFill
-    elif not goingUporDown and not connected or (connected and isLocalLink) : 
+    # if not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and activity:
+        # screenColor = green
+        # fill = greenTextFill
+    # elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and not activity:
+        # screenColor = blue
+        # fill = blueTextFill
+    # elif not goingUporDown and connected and not isLocalLink and not isConfigured and canReachServer :
+        # screenColor = orange
+        # fill = orangeTextFill
+    # elif not goingUporDown and not connected or (connected and isLocalLink) or (connected and not canReachServer): 
+        # screenColor = red
+        # fill = redTextFill
+    # elif goingUporDown:
+        # screenColor = black
+        # fill = blackTextFill
+    # else:
+        # screenColor = black
+        # fill = blackTextFill
+        
+        
+    if not goingUporDown and not connected or (connected and isLocalLink): 
         screenColor = red
         fill = redTextFill
+    elif not goingUporDown and connected and not isLocalLink and not isConfigured :
+        screenColor = orange
+        fill = orangeTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and not canReachServer:
+        screenColor = yellow
+        fill = yellowTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and activity:
+        screenColor = green
+        fill = greenTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and not activity:
+        screenColor = blue
+        fill = blueTextFill
     elif goingUporDown:
         screenColor = black
         fill = blackTextFill
