@@ -7,7 +7,7 @@ import sys, os
 from time import sleep
 from datetime import datetime
 import hashlib
-
+import re
 
 def _procCmds(cmds):
     p = [0 for c in cmds]
