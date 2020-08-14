@@ -7,7 +7,7 @@ import sys, os
 from time import sleep
 from datetime import datetime
 import hashlib
-
+import re
 
 def _procCmds(cmds):
     p = [0 for c in cmds]
@@ -20,12 +20,37 @@ def _procCmds(cmds):
     p[0].stdout.close()
     resp = str(p[len(p)-1].communicate()[0],'utf-8')
     return resp
+    
+def _serviceStatus(service):
+    return os.system('systemctl is-active --quiet ' + service) == 0
+
+def _gatherServiceInfo():
+    serviceList = [
+        'amya-cmd-resp-controllerd.service',
+        'amya-cmd-resp-slaved.service',
+        'amya-logo-2.service',
+        'amya-monitor-ramdisk.service',
+        'amya-node-api.service',
+        'amya-publish-pickled.service',
+        'amya-serial-polld.service',
+        'amya-serial-server.service'
+    ]
+    status = map(_serviceStatus, serviceList)
+    return dict(zip(serviceList, status))
 
 def _gatherInfo():
     sip = ShowIP()
     hostname = sip.getHostname()
     connected, net, host, mac = sip.getIPText()
+    provisioned = False
+    goingUporDown = False
+    activity = False
     return connected, net, host, mac, hostname
+    
+def _isLocalLink(IP):
+    regex = r"^169.254"
+    m = re.match(regex,IP)
+    return m != None
 
 def _getTime():
     now = datetime.now()
@@ -45,7 +70,7 @@ def _makeImage():
         screenColor = "green.png"
     else:
         screenColor = "red.png"
-    img = Image.open(screenColor)
+    img = Image.open(screenColor) 
 
     d = ImageDraw.Draw(img)
     fill = (255,255,255)
@@ -105,6 +130,109 @@ def makeImage():
     textOverlay.text((164,70), "{}".format(dtime), fill=fill, font=font)
     bg.show()
     bg.save("pil_text.png")
+		
+		
+def makeImage_2():
+
+    canvasW, canvasH =(320, 240)
+    
+    white = (255, 255, 255)
+    grey = (181, 181, 181)
+    black = (0,0,0)
+    red = (255, 0, 0)
+    orange = (255, 153, 0)
+    yellow = (255, 225, 0)
+    green = (102, 255, 102)
+    blue = (0, 102, 255)
+    
+    whiteTextFill = white
+    greyTextFill = white
+    blackTextFill = white
+    redTextFill =  white
+    yellowTextFill = black
+    orangeTextFill = black
+    greenTextFill = black
+    blueTextFill = white
+    
+    connected, net, host, mac, hostname = _gatherInfo()
+    dt, dtime = _getTime()
+    
+        # serviceList = [
+        # 'amya-cmd-resp-controllerd.service',
+        # 'amya-cmd-resp-slaved.service',
+        # 'amya-logo-2.service',
+        # 'amya-monitor-ramdisk.service',
+        # 'amya-node-api.service',
+        # 'amya-publish-pickled.service',
+        # 'amya-serial-polld.service',
+        # 'amya-serial-server.service'
+    # ]
+    
+    serviceStatus = _gatherServiceInfo()
+    isConfigured = os.path.isfile('/storage/opt/easy-rsa/easyrsa3/pki/ca.crt')
+    canReachServer = serviceStatus["amya-publish-pickled.service"]
+    isLocalLink = _isLocalLink(host) 
+    goingUporDown = False # don't know how to detect this yet.
+    activity = True # don't know how to detect this yet.
+
+    
+   # '- Operational display
+   # '- Add badge that flashes when a serial string is RCVD from RW unit but failed publication; use a second badge type if also successful publication to the broker
+   # '- Change background colors:
+   # '- Black on boot up and programmatic or commanded shut down (can't do anything on ACPI)
+   # '- RED: no LAN connection or there is a local-link IP address
+   # '- ORANGE: Got LAN IP addresss, but not configured
+   # '- YELLOW:  Got IP addresss, is configured, cannot reach server
+   # '- GREEN: all good: IP address, services running normally
+   # '- BLUE: (as in  holding its breath...): All good, but no serial data in past X minutes
+   # '- Font and font color: maximum readability with given background from wide angle
+
+    if not goingUporDown and not connected or (connected and isLocalLink): 
+        screenColor = red
+        fill = redTextFill
+    elif not goingUporDown and connected and not isLocalLink and not isConfigured :
+        screenColor = orange
+        fill = orangeTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and not canReachServer:
+        screenColor = yellow
+        fill = yellowTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and activity:
+        screenColor = green
+        fill = greenTextFill
+    elif not goingUporDown and connected and not isLocalLink and isConfigured and canReachServer and not activity:
+        screenColor = blue
+        fill = blueTextFill
+    elif goingUporDown:
+        screenColor = black
+        fill = blackTextFill
+    else:
+        screenColor = black
+        fill = blackTextFill
+       
+    bg = Image.new('RGB', (canvasW, canvasH), screenColor)
+    
+    logo = Image.open("awt_logo.png")
+    logoW, logoH = logo.size
+    logoPastePos = (int((canvasW-logoW)/2), 3)
+    
+    bg.paste(logo, logoPastePos, logo)
+    
+    fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+    fontSize = 17
+    font = ImageFont.truetype(fontPath, fontSize)
+    line = "this line of text fills the screen width"
+    textOverlay = ImageDraw.Draw(bg)
+    
+    verticalLineSpace = 0.3 # multiplier ie: .3 means 30%
+
+    textOverlay.text((8,105), " Network: {}".format(net), fill=fill, font=font)
+    textOverlay.text((8,131), "      IP: {}".format(host), fill=fill, font=font)
+    textOverlay.text((8,157), "     MAC: {}".format(mac), fill=fill, font=font)
+    textOverlay.text((8,183), "Hostname: {}".format(hostname), fill=fill, font=font)
+    textOverlay.text((14,70), "{}".format(dt), fill=fill, font=font)
+    textOverlay.text((164,70), "{}".format(dtime), fill=fill, font=font)
+    bg.show()
+    bg.save("pil_text.png")
 
 def testActive():
     cmd1 = 'ps aux'
@@ -137,7 +265,7 @@ def main():
 
     # get two instances of fbi running initially.  this, for some reason, prevents killing
     # the fbi processes from blanking out the display and showing "oops terminated" in console
-    makeImage()
+    makeImage_2()
     logger.debug("starting the first fbi processes now..")
     execute_cmd(updateDisplayCmd)
     pid, _ = execute_cmd(getFbiPid)
@@ -154,7 +282,7 @@ def main():
         #execute_cmd(killFbiCmd)
 
         # make a new image every loop and capture an sha1 hash of the image
-        makeImage()
+        makeImage_2()
         imageHashNow=hashlib.sha1(open('pil_text.png', 'rb').read()).hexdigest()
 
         # here we detect if the image has changed
