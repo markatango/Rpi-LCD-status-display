@@ -58,6 +58,7 @@ def _makeImage():
 #    cmd = 'rm ./pil*'
 #    args = shlex.split(cmd)
 #    p = subprocess.Popen(args, stdout=subprocess.DEVNULL)
+
     img.save('pil_text.png')
     # cmd = 'mv pil_text.temp.png pil_text.png'
     # args = shlex.split(cmd)  
