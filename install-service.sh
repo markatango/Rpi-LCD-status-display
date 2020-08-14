@@ -2,7 +2,7 @@
 
 STATUS_SERVICE=amya-logo-2.service
 SPLASH_SERVICE=splashscreen.service
-DEST=/etc/systemd/system
+DEST=/lib/systemd/system
 
 sudo cp $STATUS_SERVICE $DEST
 sudo cp $SPLASH_SERVICE $DEST
