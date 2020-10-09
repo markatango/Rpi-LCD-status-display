@@ -1,0 +1,12 @@
+[Unit]
+Description=system halted splash screen
+DefaultDependencies=no
+After=unmount.target
+Before=final.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/amya-status-display/fb.py -img /opt/amya-status-display/halted.png
+
+[Install]
+WantedBy=shutdown.target
