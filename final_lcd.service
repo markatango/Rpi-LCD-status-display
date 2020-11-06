@@ -6,7 +6,7 @@ After=unmount.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 /opt/amya-status-display/fb.py -img /opt/amya-status-display/shutting_down.png
+ExecStart=/usr/bin/python3 /opt/amya-status-display/fb.py -img /opt/amya-status-display/halted_pullplug.png
 
 [Install]
-WantedBy=shutdown.target
+WantedBy=final.target

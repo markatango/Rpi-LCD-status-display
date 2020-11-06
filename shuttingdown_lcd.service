@@ -1,11 +1,11 @@
 [Unit]
 Description=system shutting down splash screen
 DefaultDependencies=no
-Before=shutdown.target reboot.target halt.target
+Before=reboot.target
 
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/python3 /opt/amya-status-display/fb.py -img /opt/amya-status-display/shutting_down.png
 
 [Install]
-WantedBy=reboot.target halt.target poweroff.target
+WantedBy=reboot.target 
